@@ -7,29 +7,28 @@ Created: January 2025
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.edge.service import Service
+from selenium.webdriver.edge.options import Options
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 import random
 import requests
 import uuid
 from datetime import datetime
+
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-PROXY_LIST = os.environ.get("PROXY_LIST").split(',')
+PROXY_LIST = os.environ.get("PROXY_LIST")
 
 class TwitterScraper:
     def __init__(self):
+        self.proxy_address = self._get_new_proxy()
         self.driver = self._configure_driver()
         self.results = []
 
@@ -37,15 +36,19 @@ class TwitterScraper:
         return random.choice(PROXY_LIST)
 
     def _configure_driver(self):
-        options = Options()
-        options.add_argument("--headless")  # Run in headless mode for Docker
-        options.add_argument("--no-sandbox")  # Required for Docker
-        options.add_argument("--disable-dev-shm-usage")  # Overcome limited shared memory
-        options.add_argument("--disable-notifications")  # Disable notifications
-        options.add_argument("--start-maximized")  # Maximize window size (optional for headless mode)
+        proxy = Proxy()
+        proxy.proxy_type = ProxyType.MANUAL
+        proxy.http_proxy = proxy.ssl_proxy = self.proxy_address
 
-        driver_path = ChromeDriverManager().install()
-        return webdriver.Chrome(service=Service(driver_path), options=options)
+        options = Options()
+        options.add_argument("--start-maximized")
+        options.add_argument("--disable-notifications")
+        options.proxy = proxy
+
+        return webdriver.Edge(
+            service=Service(EdgeChromiumDriverManager().install()), 
+            options=options
+        )
 
     def _log_result(self, step, status, message=""):
         self.results.append({
