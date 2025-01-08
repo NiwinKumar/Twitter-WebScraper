@@ -18,7 +18,12 @@ import random
 import requests
 import uuid
 from datetime import datetime
-from config import PROXY_LIST
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PROXY_LIST = os.environ.get("PROXY_LIST")
 
 class TwitterScraper:
     def __init__(self):

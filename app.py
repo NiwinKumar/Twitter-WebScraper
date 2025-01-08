@@ -7,6 +7,10 @@ Created: January 2025
 from flask import Flask, jsonify, render_template
 from main import fetch_trending_topics
 from database import Database
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 

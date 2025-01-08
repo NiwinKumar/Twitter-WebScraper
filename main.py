@@ -8,11 +8,18 @@ from twitter_scraper import TwitterScraper
 from database import Database
 from datetime import datetime
 import uuid
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PASSWORD = os.environ.get("PASSWORD")
+USERNAME = os.environ.get("TWTUSERNAME")
 
 def fetch_trending_topics():
     scraper = TwitterScraper()
     try:
-        if scraper.login("iamniwin", "Very@sec7#"):
+        if scraper.login(USERNAME, PASSWORD):
             trends = scraper.get_trending_topics()
             if trends:
                 unique_id = str(uuid.uuid4())

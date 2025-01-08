@@ -5,7 +5,14 @@ Created: January 2025
 """
 
 from pymongo import MongoClient
-from config import MONGO_URI, MONGO_DB, MONGO_COLLECTION
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MONGO_URI = os.environ.get("MONGO_URI")
+MONGO_DB = os.environ.get("MONGO_DB")
+MONGO_COLLECTION = os.environ.get("MONGO_COLLECTION")
 
 class Database:
     @staticmethod
