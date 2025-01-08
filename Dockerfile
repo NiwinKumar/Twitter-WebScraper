@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Set environment variables for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary system dependencies for Edge, Selenium, and scraping
+# Install necessary system dependencies for Chrome, Selenium, and scraping
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -20,20 +20,27 @@ RUN apt-get update && apt-get install -y \
     libxcomposite1 \
     libxrandr2 \
     libsecret-1-0 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libnspr4 \
+    libnss3 \
+    xdg-utils \
     && apt-get clean
 
-# Download and install Microsoft Edge Beta version
-RUN wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-beta/microsoft-edge-beta_93.0.961.27-1_amd64.deb
-RUN dpkg -i microsoft-edge-beta_93.0.961.27-1_amd64.deb
-RUN apt-get install -f -y
+# Install Google Chrome stable version
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -f -y
 
-# Install the matching version of Edge WebDriver
-RUN wget https://msedgedriver.azureedge.net/93.0.961.27/edgedriver_linux64.zip
-RUN unzip edgedriver_linux64.zip -d /usr/local/bin/
-RUN chmod +x /usr/local/bin/msedgedriver
+# Install ChromeDriver (make sure to match the version of Chrome)
+RUN LATEST_CHROMEDRIVER=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
+    wget https://chromedriver.storage.googleapis.com/$LATEST_CHROMEDRIVER/chromedriver_linux64.zip && \
+    unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/chromedriver
 
-# Set environment variable for the WebDriver path (EdgeDriver)
+# Set environment variables for Chrome and WebDriver
 ENV PATH="/usr/local/bin:${PATH}"
+ENV GOOGLE_CHROME_BIN="/usr/bin/google-chrome"
+ENV CHROME_DRIVER="/usr/local/bin/chromedriver"
 
 # Set the working directory to /app (where your Python app will reside)
 WORKDIR /app
@@ -45,8 +52,11 @@ COPY . /app/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Expose port if your app is a web service (e.g., Flask, FastAPI)
-EXPOSE 5000
+# Install Gunicorn to serve the app
+RUN pip install gunicorn
 
-# Command to run your Python app (make sure app.py is your entry point)
-CMD ["python", "app.py"]
+# Expose the port for Gunicorn (Render will expose port 10000 by default)
+EXPOSE 10000
+
+# Command to run your app using Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
