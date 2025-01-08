@@ -93,7 +93,10 @@ Choose the method based on your preference!
 
 2. **Update Proxy Credentials**:
    - Open the `config.py` file and find the section where proxy credentials are used.
-   - Replace the PROXY_LIST = ["http://<username>:<password>@open.proxymesh.com:PORT"] with your Proxymesh username and password.
+   - Replace with your Proxymesh username and password.
+    ```bash
+    PROXY_LIST = ["http://<username>:<password>@open.proxymesh.com:PORT"]
+    ```
 
 ### Step 6: Run the Application
 
