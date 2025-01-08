@@ -18,13 +18,16 @@ RUN apt-get update -y && \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Add Microsoft Edge repository and install Edge
+# Add Microsoft Edge repository key and repository
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc && \
-    curl -sSL https://packages.microsoft.com/repos/edge/deb stable main | tee /etc/apt/sources.list.d/microsoft-edge.list && \
-    apt-get update -y && \
-    apt-get install -y microsoft-edge-stable
+    curl -sSL https://packages.microsoft.com/repos/edge/deb/ stable main | tee /etc/apt/sources.list.d/microsoft-edge.list && \
+    apt-get update -y
 
-# Install dependencies for Python and your application
+# Install Microsoft Edge browser
+RUN apt-get install -y microsoft-edge-stable || \
+    (echo "Error installing Microsoft Edge" && exit 1)
+
+# Install Python dependencies
 WORKDIR /app
 
 # Copy the requirements.txt to the container and install Python dependencies
