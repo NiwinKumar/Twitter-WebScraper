@@ -1,47 +1,33 @@
-# Use the Playwright Python base image with Edge support
-FROM mcr.microsoft.com/playwright/python:v1.29.0
+# Use official Ubuntu as a parent image
+FROM ubuntu:22.04
 
-# Install necessary system dependencies
-RUN apt-get update -y && \
-    apt-get install -y \
-    wget \
+# Set environment variables for non-interactive installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary dependencies and utilities
+RUN apt-get update && apt-get install -y \
     curl \
-    unzip \
+    gnupg \
+    lsb-release \
+    sudo \
     ca-certificates \
-    gnupg2 \
-    libgconf-2-4 \
-    libnss3 \
-    libxss1 \
-    libappindicator3-1 \
-    libindicator7 \
-    libnspr4 \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+    && apt-get clean
 
-# Add the Microsoft GPG key and repository correctly
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /usr/share/keyrings/microsoft.gpg > /dev/null && \
-    echo "deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge/deb stable main" | tee /etc/apt/sources.list.d/microsoft-edge.list && \
-    apt-get update -y
+# Download and convert the PGP key to GPG format
+RUN curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | \
+    gpg --dearmor -o /usr/share/keyrings/elastic-7.x.gpg
 
-# Install Microsoft Edge
-RUN apt-get install -y microsoft-edge-stable
+# Add the Elasticsearch repository with the GPG key and specify it in the repository configuration
+RUN echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/elastic-7.x.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | \
+    tee /etc/apt/sources.list.d/elastic-7.x.list
 
-# Install Python dependencies
-WORKDIR /app
+# Update the apt repository and install Elasticsearch
+RUN apt-get update && apt-get install -y \
+    elasticsearch \
+    && apt-get clean
 
-# Copy the requirements.txt to the container and install Python dependencies
-COPY requirements.txt .
+# Expose the necessary ports for Elasticsearch
+EXPOSE 9200 9300
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Set up environment variable for Python (Optional based on your app)
-ENV PYTHONUNBUFFERED 1
-
-# Copy your Python app files into the container
-COPY . .
-
-# Expose any necessary port for your app (Optional, based on your use case)
-EXPOSE 8080
-
-# Run the app using the specified CMD or ENTRYPOINT
-CMD ["python", "twitter_scraper.py"]
+# Set the default command to run Elasticsearch
+CMD ["elasticsearch"]
