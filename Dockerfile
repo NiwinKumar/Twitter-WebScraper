@@ -28,6 +28,8 @@ RUN apt-get update \
     fonts-liberation \
     libu2f-udev \
     libnss3-tools \
+    libasound2 \
+    libvulkan1 \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
