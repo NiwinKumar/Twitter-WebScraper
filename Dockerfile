@@ -22,13 +22,13 @@ RUN apt-get update && apt-get install -y \
     libsecret-1-0 \
     && apt-get clean
 
-# Download and install Microsoft Edge stable version
-RUN wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/microsoft-edge-stable_115.0.1901.183-1_amd64.deb
-RUN dpkg -i microsoft-edge-stable_115.0.1901.183-1_amd64.deb
+# Download and install Microsoft Edge Beta version
+RUN wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-beta/microsoft-edge-beta_93.0.961.27-1_amd64.deb
+RUN dpkg -i microsoft-edge-beta_93.0.961.27-1_amd64.deb
 RUN apt-get install -f -y
 
-# Download and install the matching version of Edge WebDriver
-RUN wget https://msedgedriver.azureedge.net/115.0.1901.183/edgedriver_linux64.zip
+# Install the matching version of Edge WebDriver
+RUN wget https://msedgedriver.azureedge.net/93.0.961.27/edgedriver_linux64.zip
 RUN unzip edgedriver_linux64.zip -d /usr/local/bin/
 RUN chmod +x /usr/local/bin/msedgedriver
 
