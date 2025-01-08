@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+env/
+venv/
+.env
+
+# Drivers
+msedgedriver.exe
+
+# IDE
+.vscode/
+*.code-workspace
+
+# Credentials
+proxy_config.json
+
+# MongoDB
+data/

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Trending Topics</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2rem;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 92vh;
+        }
+
+        #header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0rem; /* Maintain original margin */
+        }
+
+        #logo {
+            margin-right: 10px;
+            height: 30px;
+            width: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 1rem;
+        }
+
+        #credits {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.6rem;
+            color: #6c757d;
+        }
+
+        #container {
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #run-script {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #run-script:hover {
+            background-color: #0056b3;
+        }
+
+        #trends-container {
+            width: 80%;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+        }
+
+        #trends-container h4 {
+            color: #343a40;
+        }
+
+        #trends-container ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #trends-container li {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        #info {
+            width: 80%;
+            font-size: 0.9rem;
+            color: #555;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        #info pre {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        #run-again {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #run-again:hover {
+            background-color: #1e7e34;
+        }
+
+        footer {
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 2rem;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-top: 1px solid #ddd;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">
+        <img id="logo" src="https://logos-world.net/wp-content/uploads/2023/08/X-Logo.png"
+            alt="X Logo">
+            <img id="logo" src="https://e7.pngegg.com/pngimages/742/514/png-clipart-logo-youtube-twitter-bird-blue-logo-thumbnail.png"
+            alt="X Logo">
+        <h1>  X / Twitter Trending Topics</h1>
+    </div>
+    <div id="credits">By Niwin Kumar</div>
+    <div id="container">
+        <button id="run-script">Get Trending Topics</button>
+        <div id="trends-container"></div>
+        <div id="info"></div>
+    </div>
+    <footer>
+        &copy; 2023 My Trending Topics App
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#run-script").click(function () {
+                $(this).prop("disabled", true).text("Fetching...");
+                $("#trends-container").empty();
+                $("#info").empty();
+
+                $.get("/run-script", function (response) {
+                    if (response.status === "success") {
+                        fetchLatestResults();
+                    } else {
+                        $("#container").html("Error: " + response.message + "<button id='run-script'>Try Again</button>");
+                        $("#run-script").click(function () {
+                            location.reload();
+                        });
+                    }
+                });
+            });
+
+            function fetchLatestResults() {
+                $.get("/get-latest-results", function (response) {
+                    $("#run-script").prop("disabled", false).text("Get Trending Topics");
+                    if (response.status === "error") {
+                        $("#container").html("Error: " + response.message + "<button id='run-script'>Try Again</button>");
+                        $("#run-script").click(function () {
+                            location.reload();
+                        });
+                    } else {
+                        const { trends, end_time, ip_address, _id } = response;
+
+                        let trendsHTML = `<h4>Trending Topics as of ${end_time}:</h4><ul>`;
+                        trends.forEach(trend => trendsHTML += `<li>${trend}</li>`);
+                        trendsHTML += `</ul>`;
+                        $("#trends-container").html(trendsHTML);
+
+                        let infoHTML = `<p>IP Address: <strong>${ip_address["ip"]}</strong></p><p>Here's a JSON extract of the record:</p><pre>${JSON.stringify(response, null, 2)}</pre><button id="run-again">Get Trending Topics Again</button>`;
+                        $("#info").html(infoHTML);
+
+                        $("#run-again").click(function () {
+                            $("#trends-container").empty();
+                            $("#info").empty();
+                            $("#run-script").prop("disabled", false).text("Get Trending Topics");
+                            $("#run-script").show();
+                            $(this).hide();
+                            $("#run-script").click(function () {
+                                $(this).prop("disabled", true).text("Fetching...");
+                                $("#trends-container").empty();
+                                $("#info").empty();
+
+                                $.get("/run-script", function (response) {
+                                    if (response.status === "success") {
+                                        fetchLatestResults();
+                                    } else {
+                                        $("#container").html("Error: " + response.message + "<button id='run-script'>Try Again</button>");
+                                        $("#run-script").click(function () {
+                                            location.reload();
+                                        });
+                                    }
+                                });
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
