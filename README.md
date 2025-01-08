@@ -65,9 +65,9 @@ pip install -r requirements.txt
 4. **Update Connection in Project**:
    - Update your `config.py`:
      ```python
-     from pymongo import MongoClient
-     client = MongoClient('mongodb://localhost:27017')
-     db = client['trending_topics']
+     MONGO_URI = "mongodb://localhost:27017/"
+     MONGO_DB = "twitter_data"
+     MONGO_COLLECTION = "trending_topics"
      ```
 
 ## Using MongoDB Atlas
@@ -77,8 +77,9 @@ pip install -r requirements.txt
 3. **Update Connection in Project**:
    - Replace `<username>`, `<password>`, and `<dbname>` in `config.py`:
      ```python
-     client = MongoClient('mongodb+srv://<username>:<password>@cluster.mongodb.net/<dbname>')
-     db = client['trending_topics']
+     MONGO_URI = "mongodb+srv://<username>:<password>@cluster.mongodb.net/<dbname>"
+     MONGO_DB = "twitter_data"
+     MONGO_COLLECTION = "trending_topics"
      ```
 
 Choose the method based on your preference!
