@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/playwright/python:v1.29.0
 
 # Install necessary system dependencies
 RUN apt-get update -y && \
-    apt-get upgrade -y && \
     apt-get install -y \
     wget \
     curl \
@@ -15,13 +14,15 @@ RUN apt-get update -y && \
     libxss1 \
     libappindicator3-1 \
     libindicator7 \
+    libnspr4 \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Microsoft Edge and its driver for Selenium
-RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
-RUN curl -sSL https://packages.microsoft.com/config/debian/10/prod.list | tee /etc/apt/sources.list.d/microsoft-edge.list
-RUN apt-get update -y && apt-get install -y microsoft-edge-stable
+# Add Microsoft Edge repository and install Edge
+RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc && \
+    curl -sSL https://packages.microsoft.com/repos/edge/deb stable main | tee /etc/apt/sources.list.d/microsoft-edge.list && \
+    apt-get update -y && \
+    apt-get install -y microsoft-edge-stable
 
 # Install dependencies for Python and your application
 WORKDIR /app
