@@ -1,62 +1,59 @@
-# Use Python 3.10 as the base image (slim for lightweight)
-FROM python:3.10-slim
+# Use official Python 3.9 image as a base
+FROM python:3.9-slim
 
-# Set environment variables for non-interactive installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install necessary system dependencies for Chrome, Selenium, and scraping
-RUN apt-get update && apt-get install -y \
+# Install dependencies
+RUN apt-get update \
+    && apt-get install -y \
     wget \
     curl \
     unzip \
     ca-certificates \
-    libx11-xcb1 \
-    libgdk-pixbuf2.0-0 \
-    libdbus-glib-1-2 \
-    libxtst6 \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
+    libx11-dev \
     libxcomposite1 \
     libxrandr2 \
-    libsecret-1-0 \
-    fonts-liberation \
-    libappindicator3-1 \
+    libglu1-mesa \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
     libnspr4 \
     libnss3 \
+    libxss1 \
     xdg-utils \
-    && apt-get clean
+    libappindicator3-1 \
+    libx11-xcb1 \
+    fonts-liberation \
+    libu2f-udev \
+    libnss3-tools \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome stable version
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -f -y
+# Install Google Chrome (latest stable)
+RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb \
+    && dpkg -i google-chrome.deb \
+    && apt-get install -f -y \
+    && rm google-chrome.deb
 
-# Install ChromeDriver (make sure to match the version of Chrome)
-RUN LATEST_CHROMEDRIVER=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    wget https://chromedriver.storage.googleapis.com/$LATEST_CHROMEDRIVER/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
-    chmod +x /usr/local/bin/chromedriver
+# Install ChromeDriver using webdriver-manager
+RUN pip install webdriver-manager
 
-# Set environment variables for Chrome and WebDriver
-ENV PATH="/usr/local/bin:${PATH}"
-ENV GOOGLE_CHROME_BIN="/usr/bin/google-chrome"
-ENV CHROME_DRIVER="/usr/local/bin/chromedriver"
+# Set environment variable to disable headless errors (render doesn't need this for headless)
+ENV DISPLAY=:99
 
-# Set the working directory to /app (where your Python app will reside)
+# Set working directory
 WORKDIR /app
 
 # Copy the application files into the container
-COPY . /app/
+COPY . .
 
-# Install Python dependencies from requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install application dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Gunicorn to serve the app
-RUN pip install gunicorn
+# Expose the necessary port for the app
+EXPOSE 8080
 
-# Expose the port for Gunicorn (Render will expose port 10000 by default)
-EXPOSE 10000
-
-# Command to run your app using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
+# Command to run the application using Gunicorn
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8080"]
