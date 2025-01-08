@@ -38,4 +38,4 @@ EXPOSE 5000
 ENV PYTHONUNBUFFERED 1
 
 # Define the command to run your app using Gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "app:app"]
