@@ -18,14 +18,13 @@ RUN apt-get update -y && \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Add Microsoft Edge repository key and repository
-RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc && \
-    curl -sSL https://packages.microsoft.com/repos/edge/deb/ stable main | tee /etc/apt/sources.list.d/microsoft-edge.list && \
+# Add the Microsoft GPG key and repository correctly
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /usr/share/keyrings/microsoft.gpg > /dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge/deb stable main" | tee /etc/apt/sources.list.d/microsoft-edge.list && \
     apt-get update -y
 
-# Install Microsoft Edge browser
-RUN apt-get install -y microsoft-edge-stable || \
-    (echo "Error installing Microsoft Edge" && exit 1)
+# Install Microsoft Edge
+RUN apt-get install -y microsoft-edge-stable
 
 # Install Python dependencies
 WORKDIR /app
