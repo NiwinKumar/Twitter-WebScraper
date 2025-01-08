@@ -40,8 +40,11 @@ class TwitterScraper:
         proxy.http_proxy = proxy.ssl_proxy = self.proxy_address
 
         options = Options()
-        options.add_argument("--start-maximized")
-        options.add_argument("--disable-notifications")
+        options.add_argument("--headless")  # Run in headless mode for Docker
+        options.add_argument("--no-sandbox")  # Required for Docker
+        options.add_argument("--disable-dev-shm-usage")  # Overcome limited shared memory
+        options.add_argument("--disable-notifications")  # Disable notifications
+        options.add_argument("--start-maximized")  # Maximize window size (optional for headless mode)
         options.proxy = proxy
 
         return webdriver.Edge(
