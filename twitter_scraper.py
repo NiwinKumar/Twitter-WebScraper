@@ -7,13 +7,13 @@ Created: January 2025
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.edge.service import Service
-from selenium.webdriver.edge.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 import random
 import requests
 import uuid
@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PROXY_LIST = os.environ.get("PROXY_LIST")
+PROXY_LIST = os.environ.get("PROXY_LIST").split(',')
 
 class TwitterScraper:
     def __init__(self):
@@ -45,10 +45,12 @@ class TwitterScraper:
         options.add_argument("--disable-dev-shm-usage")  # Overcome limited shared memory
         options.add_argument("--disable-notifications")  # Disable notifications
         options.add_argument("--start-maximized")  # Maximize window size (optional for headless mode)
+        options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration in headless mode
         options.proxy = proxy
 
-        return webdriver.Edge(
-            service=Service(EdgeChromiumDriverManager().install()), 
+        # Setup Chrome driver
+        return webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()), 
             options=options
         )
 
