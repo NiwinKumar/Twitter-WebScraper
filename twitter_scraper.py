@@ -14,6 +14,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManag
 import random
 import requests
 import uuid
@@ -27,7 +31,6 @@ PROXY_LIST = os.environ.get("PROXY_LIST").split(',')
 
 class TwitterScraper:
     def __init__(self):
-        self.proxy_address = self._get_new_proxy()
         self.driver = self._configure_driver()
         self.results = []
 
@@ -35,24 +38,15 @@ class TwitterScraper:
         return random.choice(PROXY_LIST)
 
     def _configure_driver(self):
-        proxy = Proxy()
-        proxy.proxy_type = ProxyType.MANUAL
-        proxy.http_proxy = proxy.ssl_proxy = self.proxy_address
-
         options = Options()
         options.add_argument("--headless")  # Run in headless mode for Docker
         options.add_argument("--no-sandbox")  # Required for Docker
         options.add_argument("--disable-dev-shm-usage")  # Overcome limited shared memory
         options.add_argument("--disable-notifications")  # Disable notifications
         options.add_argument("--start-maximized")  # Maximize window size (optional for headless mode)
-        options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration in headless mode
-        options.proxy = proxy
 
-        # Setup Chrome driver
-        return webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()), 
-            options=options
-        )
+        driver_path = ChromeDriverManager().install()
+        return webdriver.Chrome(service=Service(driver_path), options=options)
 
     def _log_result(self, step, status, message=""):
         self.results.append({
