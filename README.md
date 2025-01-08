@@ -1,5 +1,6 @@
 
 # X / Twitter Trending Topics Web Application
+Author: Niwin Kumar (2025)
 
 This web application allows you to view the latest trending topics on Twitter (X) by using a Flask backend and a MongoDB database to store trending topics. The app uses Selenium for web scraping and Proxymesh for proxy rotation to fetch the trends.
 
