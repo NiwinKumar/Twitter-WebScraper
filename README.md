@@ -55,23 +55,34 @@ Install the required dependencies listed in `requirements.txt`:
 pip install -r requirements.txt
 ```
 
-### Step 4: Set Up MongoDB
+### Step 4: MongoDB Setup Guide
 
-1. **Create a MongoDB Cluster**:
-   - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and create a free-tier cluster.
-   - Once the cluster is created, create a new database (e.g., `trending_topics`) and a collection (e.g., `trends`).
+## Using MongoDB Compass
+1. **Start MongoDB Server**: Ensure MongoDB is running on your system.
+2. **Connect with Compass**: Open Compass and connect using the default URI: `mongodb://localhost:27017`.
+3. **Create Database & Collection**:
+   - In Compass, create a database (e.g., `trending_topics`) and a collection (e.g., `trends`).
+4. **Update Connection in Project**:
+   - Update your `config.py`:
+     ```python
+     from pymongo import MongoClient
+     client = MongoClient('mongodb://localhost:27017')
+     db = client['trending_topics']
+     ```
 
-2. **Obtain MongoDB URI**:
-   - In the MongoDB Atlas dashboard, click on **Connect** for your cluster.
-   - Choose **Connect your application**, and copy the connection string (e.g., `mongodb+srv://<username>:<password>@cluster.mongodb.net/<dbname>`).
+## Using MongoDB Atlas
+1. **Create a Cluster**: Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and set up a free-tier cluster.
+2. **Get Connection String**:
+   - Click **Connect** → **Connect your application** → Copy URI.
+3. **Update Connection in Project**:
+   - Replace `<username>`, `<password>`, and `<dbname>` in `config.py`:
+     ```python
+     client = MongoClient('mongodb+srv://<username>:<password>@cluster.mongodb.net/<dbname>')
+     db = client['trending_topics']
+     ```
 
-3. **Update MongoDB URI**:
-   - Open the `app.py` file in your project.
-   - Find the section where the MongoDB URI is configured and replace the placeholder `<username>`, `<password>`, and `<dbname>` with your MongoDB Atlas credentials and database name.
+Choose the method based on your preference!
 
-   ```python
-   client = MongoClient('mongodb+srv://<username>:<password>@cluster.mongodb.net/<dbname>')
-   ```
 
 ### Step 5: Set Up Proxymesh
 
@@ -80,15 +91,11 @@ pip install -r requirements.txt
    - After signing up, you will receive your **Proxymesh username** and **password**.
 
 2. **Update Proxy Credentials**:
-   - Open the `app.py` file and find the section where proxy credentials are used.
-   - Replace the `PROXY_USER` and `PROXY_PASS` with your Proxymesh username and password.
-
-   ```python
-   PROXY_USER = '<your-proxymesh-username>'
-   PROXY_PASS = '<your-proxymesh-password>'
-   ```
+   - Open the `config.py` file and find the section where proxy credentials are used.
+   - Replace the PROXY_LIST = ["http://<username>:<password>@open.proxymesh.com:PORT"] with your Proxymesh username and password.
 
 ### Step 6: Run the Application
+
 
 To start the Flask app, run:
 
@@ -109,21 +116,23 @@ This will start the server, and the web app should be accessible at `http://127.
 ```
 trending-topics-app/
 ├── app.py                  # Main Flask application file
+├── config.py               # All Variables and Credentials are stored here
+├── database.py             # Reading and Writing on MongoDB
+├── main.py                 # Main Flask application file
+├── twitter_scraper.py      # Selenium Scraping code for Twitter
 ├── requirements.txt        # Dependencies for the project
 ├── templates/
 │   └── index.html          # HTML template for displaying trends
-├── static/
-│   └── styles.css          # Custom CSS for styling
 └── README.md               # Project documentation
 ```
 
 ## Troubleshooting
 
 1. **Error: Proxy Authentication Failed**:
-   - Ensure that your Proxymesh username and password are correct in the `app.py` file.
+   - Ensure that your Proxymesh username and password are correct in the `config.py` file.
 
 2. **Error: MongoDB Connection Failed**:
-   - Double-check the MongoDB URI and credentials in the `app.py` file.
+   - Double-check the MongoDB URI and credentials in the `config.py` file.
    - Ensure that your MongoDB Atlas cluster allows connections from your IP address.
 
 3. **Selenium Issues**:
